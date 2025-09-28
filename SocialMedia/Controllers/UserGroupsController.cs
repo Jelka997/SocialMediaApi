@@ -26,7 +26,6 @@ namespace SocialMedia.Controllers
             }
 
             List<Group> allGroups = GroupRepository.Data.Values.ToList();
-            List<User> allUser = UserRepository.Data.Values.ToList();
             User odabraniUser = new User();
             foreach(Group group in allGroups)
             {
@@ -40,5 +39,51 @@ namespace SocialMedia.Controllers
 
             return Ok(odabraniUser);
         }
+
+        [HttpPut]
+        public ActionResult<User> Add(int groupId, int userId)
+        {
+            if (!GroupRepository.Data.ContainsKey(groupId))
+            {
+                return NotFound();
+            }
+
+            if (!UserRepository.Data.ContainsKey(userId))
+            {
+                return NotFound();
+            }
+            
+            User user = UserRepository.Data[userId];
+            Group group = GroupRepository.Data[groupId];
+            group.Users.Add(user);
+            user.Groups.Add(group);
+            userRepository.SaveData();
+            
+            return Ok(user);
+        }
+        
+        [HttpDelete]
+        public ActionResult<User> Remove(int groupId, int userId)
+        {
+            if (!GroupRepository.Data.ContainsKey(groupId))
+            {
+                return NotFound();
+            }
+
+            if (!UserRepository.Data.ContainsKey(userId))
+            {
+                return NotFound();
+            }
+            
+            User user = UserRepository.Data[userId];
+            Group group = GroupRepository.Data[groupId];
+            group.Users.Remove(user);
+            user.Groups.Remove(group);
+            userRepository.SaveData();
+            
+            return NoContent();
+        }
+        
+        
     }
 }

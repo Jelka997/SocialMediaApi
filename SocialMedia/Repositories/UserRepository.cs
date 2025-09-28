@@ -55,11 +55,17 @@ public class UserRepository
     public void SaveData()
     {
         List<string> lines = new List<string>();
+        List<string> links = new List<string>();
         foreach (User user in Data.Values)
         {
             lines.Add(user.FileFormat());
+            foreach (Group group in user.Groups)
+            {
+                links.Add($"{user.Id},{group.Id}");
+            }
         }
         File.WriteAllLines(filePath, lines);
+        File.WriteAllLines(linkPath, links);
     }
     
 }
