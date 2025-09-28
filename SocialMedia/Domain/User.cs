@@ -1,3 +1,4 @@
+using System.Text.Json.Serialization;
 using System.Text.RegularExpressions;
 
 namespace SocialMedia.Domain;
@@ -10,6 +11,7 @@ public class User
     public string Name { get; set; }
     public string LastName { get; set; }
     public DateTime Birthday { get; set; }
+    [JsonIgnore]
     public List<Group> Groups { get; set; }
 
     public User(int id, string username, string name, string lastName, DateTime birthday)

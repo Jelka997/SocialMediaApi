@@ -8,9 +8,6 @@ namespace SocialMedia
         public static void Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
-            GroupRepository groupRepository = new GroupRepository();
-            UserRepository userRepository = new UserRepository();
-
             // Add services to the container.
 
             builder.Services.AddControllers();
