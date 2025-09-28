@@ -1,4 +1,6 @@
 
+using SocialMedia.Repositories;
+
 namespace SocialMedia
 {
     public class Program

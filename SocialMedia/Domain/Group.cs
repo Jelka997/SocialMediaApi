@@ -15,5 +15,10 @@ public class Group
         DateCreated = dateCreated;
         Users = new List<User>();
     }
+
+    public string FileFormat()
+    {
+        return $"{Id},{Name},{DateCreated.ToString("yyyy-MM-dd")}";
+    }
     
 }

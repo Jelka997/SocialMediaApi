@@ -4,7 +4,7 @@ namespace SocialMedia.Domain;
 
 public class User
 {
-    //Korisnik ima id, korisničko ime (string), ime (string), prezime (string) i datum rođenja (DateTime). Grupa ima id, ime (string) i datum osnivanja (DateTime)
+    //Korisnik ima id, korisničko ime (string), ime (string), prezime (string) i datum rođenja (DateTime).
     public int Id { get; set; }
     public string Username { get; set; }
     public string Name { get; set; }
@@ -20,5 +20,10 @@ public class User
         LastName = lastName;
         Birthday = birthday;
         Groups = new List<Group>();
+    }
+
+    public string FileFormat()
+    {
+        return $"{Id},{Username},{Name},{LastName},{Birthday.ToString("yyyy-MM-dd")}";
     }
 }
