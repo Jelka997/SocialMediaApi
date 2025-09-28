@@ -8,7 +8,7 @@ namespace SocialMedia.Controllers
     [Route("api/users")]
     [ApiController]
     public class UserController : ControllerBase
-    {
+    {   private GroupRepository groupRepository = new GroupRepository();
         private UserRepository userRepository = new UserRepository();
 
 
