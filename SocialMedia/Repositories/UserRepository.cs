@@ -5,6 +5,7 @@ namespace SocialMedia.Repositories;
 public class UserRepository
 {
     private const string filePath = "Data/korisnici.csv";
+    private const string linkPath = "Data/clanstva.csv";
     public static Dictionary<int, User> Data;
 
     public UserRepository()
@@ -33,6 +34,17 @@ public class UserRepository
                 User user = new User(id, username, name, lastName, dateCreated);
                 Data.Add(id, user);
             }
+            
+            string[] links = File.ReadAllLines(linkPath);
+            foreach (string link in links)
+            {
+                string[] attributes = link.Split(',');
+                int userId = int.Parse(attributes[0]);
+                int groupId = int.Parse(attributes[1]);
+                Data[userId].Groups.Add(GroupRepository.Data[groupId]);
+                GroupRepository.Data[groupId].Users.Add(Data[userId]);
+            }
+            
         }
         catch (Exception e)
         {
