@@ -52,7 +52,7 @@ public class UserRepository
         }
     }
 
-    private void SaveData()
+    public void SaveData()
     {
         List<string> lines = new List<string>();
         foreach (User user in Data.Values)
