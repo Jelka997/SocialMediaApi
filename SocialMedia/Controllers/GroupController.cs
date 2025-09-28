@@ -18,13 +18,46 @@ public class GroupController : ControllerBase
         return Ok(groups);
     }
     
-    [HttpGet("{id}")]
-    public ActionResult<Group> GetById(int id)
+    [HttpPost]
+    public ActionResult<Group> Create([FromBody] Group newGroup)
+    {
+        if (string.IsNullOrWhiteSpace(newGroup.Name)  || string.IsNullOrWhiteSpace(newGroup.DateCreated.ToString()))
+        {
+            return BadRequest();
+        }
+
+        newGroup.Id = SracunajNoviId(GroupRepository.Data.Keys.ToList());
+        GroupRepository.Data[newGroup.Id] = newGroup;
+        groupRepository.SaveData();
+
+        return Ok(newGroup);
+    }
+    
+    [HttpDelete("{id}")]
+    public ActionResult Delete(int id)
     {
         if (!GroupRepository.Data.ContainsKey(id))
         {
             return NotFound();
         }
-        return Ok(GroupRepository.Data[id]);
+
+        GroupRepository.Data.Remove(id);
+        groupRepository.SaveData();
+
+        return NoContent();
+    }
+    
+    private int SracunajNoviId(List<int> identifikatori)
+    {
+        int maxId = 0;
+        foreach (int id in identifikatori)
+        {
+            if (id > maxId)
+            {
+                maxId = id;
+            }
+        }
+
+        return maxId + 1;
     }
 }
