@@ -24,6 +24,10 @@ public class User
         Groups = new List<Group>();
     }
 
+    public User()
+    {
+    }
+
     public string FileFormat()
     {
         return $"{Id},{Username},{Name},{LastName},{Birthday.ToString("yyyy-MM-dd")}";
