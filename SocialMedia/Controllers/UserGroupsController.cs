@@ -39,7 +39,7 @@ namespace SocialMedia.Controllers
 
             return Ok(odabraniUser);
         }
-
+    
         [HttpPut]
         public ActionResult<User> Add(int groupId, int userId)
         {
