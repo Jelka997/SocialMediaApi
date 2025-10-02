@@ -12,7 +12,7 @@ public class User
     public string LastName { get; set; }
     public DateTime Birthday { get; set; }
     [JsonIgnore]
-    public List<Group> Groups { get; set; }
+    public List<Group>? Groups { get; set; }
 
     public User(int id, string username, string name, string lastName, DateTime birthday)
     {
@@ -26,6 +26,7 @@ public class User
 
     public User()
     {
+        Groups = new List<Group>();
     }
 
     public string FileFormat()
