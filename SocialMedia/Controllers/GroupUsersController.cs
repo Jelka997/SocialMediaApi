@@ -36,4 +36,24 @@ public class GroupUsersController : ControllerBase
         
         return Ok(odabraniUseri);
     }
+
+    [HttpGet("unassigned")]
+    public ActionResult<List<User>> GetUnassigned(int groupId)
+    {
+        if (!GroupRepository.Data.ContainsKey(groupId))
+        {
+            return NotFound();
+        }
+        List<User> odabraniUseri = new List<User>();
+        Group odabranaGrupa = GroupRepository.Data[groupId];
+
+        foreach (User user in UserRepository.Data.Values.ToList())
+        {
+            if (!user.Groups.Contains(odabranaGrupa))
+            {
+                odabraniUseri.Add(user);
+            }
+        }
+        return Ok(odabraniUseri);
+    }
 }
