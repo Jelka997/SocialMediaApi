@@ -22,39 +22,41 @@ namespace SocialMedia.Controllers
         [HttpGet("{id}")]
         public ActionResult<User> GetById(int id)
         {
-            return Ok(userDbRepository.GetByIdDb(id));
+            User user = userDbRepository.GetByIdDb(id);
+            if(user == null) { return NotFound();}
+            return Ok(user);
         }
 
         [HttpPost]
         public ActionResult<User> Create([FromBody] User newUser)
         {
+            if (string.IsNullOrWhiteSpace(newUser.Username) || string.IsNullOrWhiteSpace(newUser.Name) || string.IsNullOrWhiteSpace(newUser.LastName) || string.IsNullOrWhiteSpace(newUser.Birthday.ToString()))
+            {
+                return BadRequest();
+            }
             return Ok(userDbRepository.CreateNewUser(newUser));
         }
 
         [HttpPut("{id}")]
         public ActionResult<User> Update(int id, [FromBody] User uUser)
         {
+            var user = userDbRepository.GetByIdDb(id);
+            if (string.IsNullOrWhiteSpace(uUser.Username) || string.IsNullOrWhiteSpace(uUser.Name) || string.IsNullOrWhiteSpace(uUser.LastName) || string.IsNullOrWhiteSpace(uUser.Birthday.ToString()))
+            {
+                return BadRequest();
+            }
+            if (user == null) { return NotFound(); }
+            
             return Ok(userDbRepository.UpdateUser(id, uUser));
         }
 
         [HttpDelete("{id}")]
         public ActionResult Delete(int id)
         {
-            return Ok(userDbRepository.DeleteUser(id));
+            var user = userDbRepository.GetByIdDb(id);
+            if (user == null) { return NotFound(); }
+            userDbRepository.DeleteUser(id);
+            return NoContent();
         }
-
-        /* private int SracunajNoviId(List<int> identifikatori)
-         {
-             int maxId = 0;
-             foreach (int id in identifikatori)
-             {
-                 if (id > maxId)
-                 {
-                     maxId = id;
-                 }
-             }
-
-             return maxId + 1;
-         }*/
     }
 }

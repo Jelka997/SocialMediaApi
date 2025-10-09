@@ -140,8 +140,7 @@ namespace SocialMedia.Repositories
                 command.Parameters.AddWithValue("@Surname", user.LastName);
                 command.Parameters.AddWithValue("@Birthday", user.Birthday);
 
-                int rowsAffected = command.ExecuteNonQuery();
-                if (rowsAffected == 0) { return null; }
+                command.ExecuteNonQuery();
             }
             catch (SqliteException ex)
             {
@@ -161,7 +160,7 @@ namespace SocialMedia.Repositories
             }
             return user;
         }
-        public int DeleteUser(int id)
+        public void DeleteUser(int id)
         {
             try
             {
@@ -172,8 +171,7 @@ namespace SocialMedia.Repositories
 
                 command.Parameters.AddWithValue("@Id", id);
 
-                int rowsAffected = command.ExecuteNonQuery();
-                return rowsAffected;
+                command.ExecuteNonQuery();
             }
             catch (SqliteException ex)
             {
@@ -191,7 +189,6 @@ namespace SocialMedia.Repositories
             {
                 Console.WriteLine($"Neočekivana greška: {ex.Message}");
             }
-            return 0;
         }
     }
 }
