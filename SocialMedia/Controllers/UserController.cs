@@ -28,52 +28,33 @@ namespace SocialMedia.Controllers
         [HttpPost]
         public ActionResult<User> Create([FromBody] User newUser)
         {
-            if (string.IsNullOrWhiteSpace(newUser.Username) || string.IsNullOrWhiteSpace(newUser.Name) || string.IsNullOrWhiteSpace(newUser.LastName) || string.IsNullOrWhiteSpace(newUser.Birthday.ToString()))
-            {
-                return BadRequest();
-            }
-
-            newUser.Id = SracunajNoviId(UserRepository.Data.Keys.ToList());
-            UserRepository.Data[newUser.Id] = newUser;
-            userRepository.SaveData();
-
-            return Ok(newUser);
+            return Ok(userDbRepository.CreateNewUser(newUser));
         }
-
 
         [HttpPut("{id}")]
         public ActionResult<User> Update(int id, [FromBody] User uUser)
         {
-            if (string.IsNullOrWhiteSpace(uUser.Username) || string.IsNullOrWhiteSpace(uUser.Name) || string.IsNullOrWhiteSpace(uUser.LastName) || string.IsNullOrWhiteSpace(uUser.Birthday.ToString()))
-            {
-                return BadRequest();
-            }
-            if (!UserRepository.Data.ContainsKey(id))
-            {
-                return NotFound();
-            }
-
-            User user = UserRepository.Data[id];
-            user.Username = uUser.Username;
-            user.Name = uUser.Name;
-            user.LastName = uUser.LastName;
-            user.Birthday = uUser.Birthday;
-            userRepository.SaveData();
-
-            return Ok(user);
+            return Ok(userDbRepository.UpdateUser(id, uUser));
         }
-        private int SracunajNoviId(List<int> identifikatori)
+
+        [HttpDelete("{id}")]
+        public ActionResult Delete(int id)
         {
-            int maxId = 0;
-            foreach (int id in identifikatori)
-            {
-                if (id > maxId)
-                {
-                    maxId = id;
-                }
-            }
-
-            return maxId + 1;
+            return Ok(userDbRepository.DeleteUser(id));
         }
+
+        /* private int SracunajNoviId(List<int> identifikatori)
+         {
+             int maxId = 0;
+             foreach (int id in identifikatori)
+             {
+                 if (id > maxId)
+                 {
+                     maxId = id;
+                 }
+             }
+
+             return maxId + 1;
+         }*/
     }
 }
