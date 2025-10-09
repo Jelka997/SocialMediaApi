@@ -21,6 +21,11 @@
 mono_crash.*
 .idea/
 .database/
+
+# Ignore SQLite database
+database/socialdata.db
+
+
 # Build results
 [Dd]ebug/
 [Dd]ebugPublic/
