@@ -11,7 +11,7 @@ public class GroupDbRepository
     {
         connectionString = configuration["ConnectionString:SQLiteConnection"];
     }
-    public List<Group> GetAll()
+    public List<Group> GetPaged(int page, int pageSize)
     {
         List<Group> groups = new List<Group>();
         try
@@ -19,9 +19,11 @@ public class GroupDbRepository
             using SqliteConnection connection = new SqliteConnection(connectionString);
             connection.Open();
         
-            string query = "SELECT * FROM Groups";
+            string query = "SELECT * FROM Groups LIMIT @PageSize OFFSET @Offset";
             using SqliteCommand command = new SqliteCommand(query, connection);
-
+            command.Parameters.AddWithValue("@PageSize", pageSize);
+            command.Parameters.AddWithValue("@Offset", pageSize * (page - 1));
+            
             using SqliteDataReader reader = command.ExecuteReader();
             while (reader.Read())
             {
@@ -206,5 +208,16 @@ public class GroupDbRepository
             Console.WriteLine($"Neočekivana greška: {ex.Message}");
             throw;
         }
+    }
+
+    public int CountAll()
+    {
+        using SqliteConnection connection = new SqliteConnection(connectionString);
+        connection.Open();
+        
+        string query = "SELECT COUNT(*) FROM Groups;";
+        using SqliteCommand command = new SqliteCommand(query, connection);
+        int totalCount = Convert.ToInt32(command.ExecuteScalar());
+        return totalCount;
     }
 }

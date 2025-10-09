@@ -9,9 +9,6 @@ namespace SocialMedia.Controllers;
 [ApiController]
 public class GroupController : ControllerBase
 {
-    private GroupRepository groupRepository = new GroupRepository();
-    private UserRepository userRepository = new UserRepository();
-
     private readonly GroupDbRepository  groupDbRepository;
 
     public GroupController(IConfiguration configuration)
@@ -20,9 +17,27 @@ public class GroupController : ControllerBase
     }
     
     [HttpGet]
-    public ActionResult<List<Group>> GetAll()
+    public ActionResult GetPaged([FromQuery] int page = 1, [FromQuery] int pageSize = 10)
     {
-        return Ok(groupDbRepository.GetAll());
+        if(page < 1 || pageSize < 1)
+        {
+            return BadRequest("Page and PageSize must be greater than zero.");
+        }
+        try
+        {
+            List<Group> groups = groupDbRepository.GetPaged(page, pageSize);
+            int totalCount = groupDbRepository.CountAll();
+            Object result = new 
+            {
+                Data = groups, 
+                TotalCount = totalCount
+            };
+            return Ok(result);
+        }
+        catch (Exception ex)
+        {
+            return Problem("An error occurred while fetching groups.");
+        }
     }
     
     [HttpGet("{id}")]
