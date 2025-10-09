@@ -11,8 +11,13 @@ public class GroupController : ControllerBase
 {
     private GroupRepository groupRepository = new GroupRepository();
     private UserRepository userRepository = new UserRepository();
-    
-    private GroupDbRepository groupDbRepository = new GroupDbRepository();
+
+    private readonly GroupDbRepository  groupDbRepository;
+
+    public GroupController(IConfiguration configuration)
+    {
+        groupDbRepository = new GroupDbRepository(configuration);
+    }
     
     [HttpGet]
     public ActionResult<List<Group>> GetAll()
@@ -23,52 +28,79 @@ public class GroupController : ControllerBase
     [HttpGet("{id}")]
     public ActionResult<Group> GetById(int id)
     {
-        Group group = groupDbRepository.GetById(id);
-        if (group  == null)
+        try
         {
-            return NotFound();
+            Group group = groupDbRepository.GetById(id);
+            if (group  == null)
+            {
+                return NotFound($"Group with ID {id} not found.");
+            }
+            return Ok(group);
         }
-        return Ok(group);
+        catch (Exception ex)
+        {
+            return Problem("An error occurred while fetching the group.");
+        }
     }
     
     [HttpPost]
     public ActionResult<Group> Create([FromBody] Group newGroup)
     {
-        if (string.IsNullOrWhiteSpace(newGroup.Name)  || string.IsNullOrWhiteSpace(newGroup.DateCreated.ToString()))
+        if (newGroup == null || string.IsNullOrWhiteSpace(newGroup.Name)  || string.IsNullOrWhiteSpace(newGroup.DateCreated.ToString()))
         {
-            return BadRequest();
+            return BadRequest("Invalid group data.");
         }
 
-        return Ok(groupDbRepository.Create(newGroup));
+        try
+        {
+            Group createdGroup = groupDbRepository.Create(newGroup); 
+            return Ok(createdGroup);
+        }
+        catch (Exception ex)
+        {
+            return Problem("An error occurred while creating the group.");
+        }
     }
     
     [HttpDelete("{id}")]
     public ActionResult Delete(int id)
     {
-        Group group = groupDbRepository.GetById(id);
-        if (group == null)
+        try
         {
-            return NotFound();
+            bool isDeleted = groupDbRepository.Delete(id); 
+            if (isDeleted)
+            {
+                return NoContent(); 
+            }
+            return NotFound($"Group with ID {id} not found."); 
         }
-
-        if (group.Id != id) 
+        catch (Exception ex)
         {
-            return BadRequest("Id ne odgovara traženoj grupi.");
+            return Problem("An error occurred while deleting the group.");
         }
-        
-        groupDbRepository.Delete(id);
-        return NoContent();
     }
 
     [HttpPut("{id}")]
-    public ActionResult Update(int id, [FromBody] Group group)
+    public ActionResult<Group> Update(int id, [FromBody] Group group)
     {
-        if (string.IsNullOrWhiteSpace(group.Name)  || string.IsNullOrWhiteSpace(group.DateCreated.ToString()) || group.Id != id)
+        if (group == null || string.IsNullOrWhiteSpace(group.Name) || string.IsNullOrWhiteSpace(group.DateCreated.ToString()))
         {
-            return BadRequest();
+            return BadRequest("Invalid group data.");
         }
-        
-        groupDbRepository.Update(group);
-        return Ok(group);
+
+        try
+        {
+            group.Id = id;
+            Group updatedGroup = groupDbRepository.Update(group); 
+            if(updatedGroup == null)
+            {
+                return NotFound();
+            }
+            return Ok(updatedGroup); 
+        }
+        catch (Exception ex)
+        {
+            return Problem("An error occurred while updating the group.");
+        }
     }
 }

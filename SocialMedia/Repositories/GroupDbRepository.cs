@@ -5,12 +5,18 @@ namespace SocialMedia.Repositories;
 
 public class GroupDbRepository
 {
+    private readonly string connectionString;
+
+    public GroupDbRepository(IConfiguration configuration)
+    {
+        connectionString = configuration["ConnectionString:SQLiteConnection"];
+    }
     public List<Group> GetAll()
     {
         List<Group> groups = new List<Group>();
         try
         {
-            using SqliteConnection connection = new SqliteConnection("Data Source=database/socialdata.db");
+            using SqliteConnection connection = new SqliteConnection(connectionString);
             connection.Open();
         
             string query = "SELECT * FROM Groups";
@@ -29,18 +35,22 @@ public class GroupDbRepository
         catch (SqliteException ex)
         {
             Console.WriteLine($"Greška pri konekciji ili izvršavanju neispravnih SQL upita: {ex.Message}");
+            throw;
         }
         catch (FormatException ex)
         {
             Console.WriteLine($"Greška u konverziji podataka iz baze: {ex.Message}");
+            throw;
         }
         catch (InvalidOperationException ex)
         {
             Console.WriteLine($"Konekcija nije otvorena ili je otvorena više puta: {ex.Message}");
+            throw;
         }
         catch (Exception ex)
         {
             Console.WriteLine($"Neočekivana greška: {ex.Message}");
+            throw;
         }
         return groups;
     }
@@ -50,7 +60,7 @@ public class GroupDbRepository
         Group group = null;
         try
         {
-            using SqliteConnection connection = new SqliteConnection("Data Source=database/socialdata.db");
+            using SqliteConnection connection = new SqliteConnection(connectionString);
             connection.Open();
         
             string query = "SELECT * FROM Groups  WHERE Id = @Id";
@@ -66,18 +76,23 @@ public class GroupDbRepository
         catch (SqliteException ex)
         {
             Console.WriteLine($"Greška pri konekciji ili izvršavanju neispravnih SQL upita: {ex.Message}");
+            throw;
+
         }
         catch (FormatException ex)
         {
             Console.WriteLine($"Greška u konverziji podataka iz baze: {ex.Message}");
+            throw;
         }
         catch (InvalidOperationException ex)
         {
             Console.WriteLine($"Konekcija nije otvorena ili je otvorena više puta: {ex.Message}");
+            throw;
         }
         catch (Exception ex)
         {
             Console.WriteLine($"Neočekivana greška: {ex.Message}");
+            throw;
         }
 
         if (group == null)
@@ -100,27 +115,33 @@ public class GroupDbRepository
             command.Parameters.AddWithValue("@Name", group.Name);
             command.Parameters.AddWithValue("@CreationDate", group.DateCreated);
             
-            int lastId = Convert.ToInt32(command.ExecuteScalar());
-            Console.WriteLine($"ID poslednje unete grupe je: {lastId}");
+            group.Id = Convert.ToInt32(command.ExecuteScalar());
+            return group;
         }
         catch (SqliteException ex)
         {
-            Console.WriteLine($"Greška pri konekciji ili izvršavanju neispravnih SQL upita: {ex.Message}");
+            Console.WriteLine($"Greška pri povezivanju sa bazom ili izvršavanju SQL upita: {ex.Message}");
+            throw;
+        }
+        catch (FormatException ex)
+        {
+            Console.WriteLine($"Greška u formatu podataka: {ex.Message}");
+            throw;
         }
         catch (InvalidOperationException ex)
         {
-            Console.WriteLine($"Konekcija nije otvorena ili je otvorena više puta: {ex.Message}");
+            Console.WriteLine($"Greška jer konekcija nije ili je više puta otvorena: {ex.Message}");
+            throw;
         }
         catch (Exception ex)
         {
             Console.WriteLine($"Neočekivana greška: {ex.Message}");
+            throw;
         }
-        
-        return group;
     }
     
     //Dodati Update, koji prihvata instancu Group klase i ažurira postojeću grupu u bazi,
-    public void Update(Group group)
+    public Group Update(Group group)
     {
         try
         {
@@ -135,24 +156,27 @@ public class GroupDbRepository
             command.Parameters.AddWithValue("@CreationDate", group.DateCreated);
             
             int rowsAffected = command.ExecuteNonQuery();
-            Console.WriteLine($"Broj pogođenih redova: {rowsAffected}");
+            return rowsAffected > 0 ? group : null;
         }
         catch (SqliteException ex)
         {
-            Console.WriteLine($"Greška pri konekciji ili izvršavanju neispravnih SQL upita: {ex.Message}");
+            Console.WriteLine($"Greška pri povezivanju sa bazom ili izvršavanju SQL upita: {ex.Message}");
+            throw;
         }
         catch (InvalidOperationException ex)
         {
-            Console.WriteLine($"Konekcija nije otvorena ili je otvorena više puta: {ex.Message}");
+            Console.WriteLine($"Greška jer konekcija nije ili je više puta otvorena: {ex.Message}");
+            throw;
         }
         catch (Exception ex)
         {
             Console.WriteLine($"Neočekivana greška: {ex.Message}");
+            throw;
         }
     }
     
     // Dodati Delete, koji prihvata id i briše grupu pod datim identifikatorom u bazi,
-    public void Delete(int id)
+    public bool Delete(int id)
     {
         try
         {
@@ -165,19 +189,22 @@ public class GroupDbRepository
             command.Parameters.AddWithValue("@Id", id);
             
             int rowsAffected = command.ExecuteNonQuery();
-            Console.WriteLine($"Broj pogođenih redova: {rowsAffected}");
+            return rowsAffected > 0;
         }
         catch (SqliteException ex)
         {
-            Console.WriteLine($"Greška pri konekciji ili izvršavanju neispravnih SQL upita: {ex.Message}");
+            Console.WriteLine($"Greška pri povezivanju sa bazom ili izvršavanju SQL upita: {ex.Message}");
+            throw;
         }
         catch (InvalidOperationException ex)
         {
-            Console.WriteLine($"Konekcija nije otvorena ili je otvorena više puta: {ex.Message}");
+            Console.WriteLine($"Greška jer konekcija nije ili je više puta otvorena: {ex.Message}");
+            throw;
         }
         catch (Exception ex)
         {
             Console.WriteLine($"Neočekivana greška: {ex.Message}");
+            throw;
         }
     }
 }
