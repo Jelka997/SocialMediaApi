@@ -86,4 +86,98 @@ public class GroupDbRepository
         }
         return group;
     }
+    
+    //Dodati Create, koji prihvata instancu Group klase, smešta je u bazu i vraća Group objekat koji ima nov id,
+    public Group Create(Group group)
+    {
+        try
+        {
+            using SqliteConnection connection = new SqliteConnection("Data Source=database/socialdata.db");
+            connection.Open();
+        
+            string query = "INSERT INTO Groups (Name, CreationDate) VALUES (@Name, @CreationDate); SELECT LAST_INSERT_ROWID();";
+            using SqliteCommand command = new SqliteCommand(query, connection);
+            command.Parameters.AddWithValue("@Name", group.Name);
+            command.Parameters.AddWithValue("@CreationDate", group.DateCreated);
+            
+            int lastId = Convert.ToInt32(command.ExecuteScalar());
+            Console.WriteLine($"ID poslednje unete grupe je: {lastId}");
+        }
+        catch (SqliteException ex)
+        {
+            Console.WriteLine($"Greška pri konekciji ili izvršavanju neispravnih SQL upita: {ex.Message}");
+        }
+        catch (InvalidOperationException ex)
+        {
+            Console.WriteLine($"Konekcija nije otvorena ili je otvorena više puta: {ex.Message}");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Neočekivana greška: {ex.Message}");
+        }
+        
+        return group;
+    }
+    
+    //Dodati Update, koji prihvata instancu Group klase i ažurira postojeću grupu u bazi,
+    public void Update(Group group)
+    {
+        try
+        {
+            using SqliteConnection connection = new SqliteConnection("Data Source=database/socialdata.db");
+            connection.Open();
+        
+            string query = "UPDATE Groups SET Name=@Name, CreationDate=@CreationDate WHERE Id=@Id;";
+            using SqliteCommand command = new SqliteCommand(query, connection);
+            
+            command.Parameters.AddWithValue("@Id", group.Id);
+            command.Parameters.AddWithValue("@Name", group.Name);
+            command.Parameters.AddWithValue("@CreationDate", group.DateCreated);
+            
+            int rowsAffected = command.ExecuteNonQuery();
+            Console.WriteLine($"Broj pogođenih redova: {rowsAffected}");
+        }
+        catch (SqliteException ex)
+        {
+            Console.WriteLine($"Greška pri konekciji ili izvršavanju neispravnih SQL upita: {ex.Message}");
+        }
+        catch (InvalidOperationException ex)
+        {
+            Console.WriteLine($"Konekcija nije otvorena ili je otvorena više puta: {ex.Message}");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Neočekivana greška: {ex.Message}");
+        }
+    }
+    
+    // Dodati Delete, koji prihvata id i briše grupu pod datim identifikatorom u bazi,
+    public void Delete(int id)
+    {
+        try
+        {
+            using SqliteConnection connection = new SqliteConnection("Data Source=database/socialdata.db");
+            connection.Open();
+        
+            string query = "DELETE FROM Groups WHERE Id=@Id;";
+            using SqliteCommand command = new SqliteCommand(query, connection);
+            
+            command.Parameters.AddWithValue("@Id", id);
+            
+            int rowsAffected = command.ExecuteNonQuery();
+            Console.WriteLine($"Broj pogođenih redova: {rowsAffected}");
+        }
+        catch (SqliteException ex)
+        {
+            Console.WriteLine($"Greška pri konekciji ili izvršavanju neispravnih SQL upita: {ex.Message}");
+        }
+        catch (InvalidOperationException ex)
+        {
+            Console.WriteLine($"Konekcija nije otvorena ili je otvorena više puta: {ex.Message}");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Neočekivana greška: {ex.Message}");
+        }
+    }
 }

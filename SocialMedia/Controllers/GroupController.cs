@@ -39,38 +39,36 @@ public class GroupController : ControllerBase
             return BadRequest();
         }
 
-        newGroup.Id = SracunajNoviId(GroupRepository.Data.Keys.ToList());
-        GroupRepository.Data[newGroup.Id] = newGroup;
-        groupRepository.SaveData();
-
-        return Ok(newGroup);
+        return Ok(groupDbRepository.Create(newGroup));
     }
     
     [HttpDelete("{id}")]
     public ActionResult Delete(int id)
     {
-        if (!GroupRepository.Data.ContainsKey(id))
+        Group group = groupDbRepository.GetById(id);
+        if (group == null)
         {
             return NotFound();
         }
 
-        GroupRepository.Data.Remove(id);
-        groupRepository.SaveData();
-
+        if (group.Id != id) 
+        {
+            return BadRequest("Id ne odgovara traženoj grupi.");
+        }
+        
+        groupDbRepository.Delete(id);
         return NoContent();
     }
-    
-    private int SracunajNoviId(List<int> identifikatori)
-    {
-        int maxId = 0;
-        foreach (int id in identifikatori)
-        {
-            if (id > maxId)
-            {
-                maxId = id;
-            }
-        }
 
-        return maxId + 1;
+    [HttpPut("{id}")]
+    public ActionResult Update(int id, [FromBody] Group group)
+    {
+        if (string.IsNullOrWhiteSpace(group.Name)  || string.IsNullOrWhiteSpace(group.DateCreated.ToString()) || group.Id != id)
+        {
+            return BadRequest();
+        }
+        
+        groupDbRepository.Update(group);
+        return Ok(group);
     }
 }
