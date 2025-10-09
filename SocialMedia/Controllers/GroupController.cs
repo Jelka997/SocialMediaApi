@@ -12,45 +12,23 @@ public class GroupController : ControllerBase
     private GroupRepository groupRepository = new GroupRepository();
     private UserRepository userRepository = new UserRepository();
     
+    private GroupDbRepository groupDbRepository = new GroupDbRepository();
+    
     [HttpGet]
     public ActionResult<List<Group>> GetAll()
     {
-        List<Group> groups = new List<Group>();
-        try
+        return Ok(groupDbRepository.GetAll());
+    }
+    
+    [HttpGet("{id}")]
+    public ActionResult<Group> GetById(int id)
+    {
+        Group group = groupDbRepository.GetById(id);
+        if (group  == null)
         {
-            using SqliteConnection connection = new SqliteConnection("Data Source=database/socialdata.db");
-            connection.Open();
-        
-            string query = "SELECT * FROM Groups";
-            using SqliteCommand command = new SqliteCommand(query, connection);
-
-            using SqliteDataReader reader = command.ExecuteReader();
-            while (reader.Read())
-            {
-                int id = Convert.ToInt32(reader["Id"]);
-                string name = reader["Name"].ToString();
-                DateTime dateCreated = DateTime.Parse(reader["CreationDate"].ToString());
-                Group group = new Group(id, name, dateCreated);
-                groups.Add(group);
-            }
+            return NotFound();
         }
-        catch (SqliteException ex)
-        {
-            Console.WriteLine($"Greška pri konekciji ili izvršavanju neispravnih SQL upita: {ex.Message}");
-        }
-        catch (FormatException ex)
-        {
-            Console.WriteLine($"Greška u konverziji podataka iz baze: {ex.Message}");
-        }
-        catch (InvalidOperationException ex)
-        {
-            Console.WriteLine($"Konekcija nije otvorena ili je otvorena više puta: {ex.Message}");
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"Neočekivana greška: {ex.Message}");
-        }
-        return Ok(groups);
+        return Ok(group);
     }
     
     [HttpPost]
