@@ -19,11 +19,21 @@ namespace SocialMedia.Controllers
         }
 
         [HttpGet]
-        public ActionResult<List<User>> GetAll()
+        public ActionResult GetPaged([FromQuery] int page = 1, [FromQuery] int pageSize = 5)
         {
-            try
+            if(page < 1 || pageSize < 1)
             {
-                return Ok(userDbRepository.GetAll());
+                return BadRequest("Page and PageSize must be greater then zero.");
+            }
+            try
+            {  List<User> users = userDbRepository.GetPaged(page, pageSize);
+                int totalCount = userDbRepository.CountAll();
+                Object result = new
+                {
+                    Data = users,
+                    TotalCount = totalCount
+                };
+                return Ok(result);
             }
             catch (Exception ex) { return Problem("An error occurred while fetching users."); }
         }
