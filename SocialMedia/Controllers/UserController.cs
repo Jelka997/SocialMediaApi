@@ -9,54 +9,85 @@ namespace SocialMedia.Controllers
     [Route("api/users")]
     [ApiController]
     public class UserController : ControllerBase
-    {   private GroupRepository groupRepository = new GroupRepository();
+    { private GroupRepository groupRepository = new GroupRepository();
         private UserRepository userRepository = new UserRepository();
-        private UserDbRepository userDbRepository = new UserDbRepository();
+        private UserDbRepository userDbRepository;
+
+        public UserController(IConfiguration configuration)
+        {
+            userDbRepository = new UserDbRepository(configuration);
+        }
 
         [HttpGet]
         public ActionResult<List<User>> GetAll()
         {
-            return Ok(userDbRepository.GetAll());
+            try
+            {
+                return Ok(userDbRepository.GetAll());
+            }
+            catch (Exception ex) { return Problem("An error occurred while fetching users."); }
         }
 
         [HttpGet("{id}")]
         public ActionResult<User> GetById(int id)
         {
-            User user = userDbRepository.GetByIdDb(id);
-            if(user == null) { return NotFound();}
-            return Ok(user);
+            try
+            {
+                User user = userDbRepository.GetByIdDb(id);
+                if (user == null) { return NotFound(); }
+                return Ok(user);
+            }
+            catch (Exception ex) { return Problem("An error occurred while fetching users."); }
+
         }
 
         [HttpPost]
         public ActionResult<User> Create([FromBody] User newUser)
         {
-            if (string.IsNullOrWhiteSpace(newUser.Username) || string.IsNullOrWhiteSpace(newUser.Name) || string.IsNullOrWhiteSpace(newUser.LastName) || string.IsNullOrWhiteSpace(newUser.Birthday.ToString()))
+            if (newUser == null || string.IsNullOrWhiteSpace(newUser.Username) || string.IsNullOrWhiteSpace(newUser.Name) || string.IsNullOrWhiteSpace(newUser.LastName) || string.IsNullOrWhiteSpace(newUser.Birthday.ToString()))
             {
-                return BadRequest();
+                return BadRequest("Invalid user data.");
             }
-            return Ok(userDbRepository.CreateNewUser(newUser));
+            try
+            {
+                return Ok(userDbRepository.CreateNewUser(newUser));
+            }
+            catch (Exception ex) { return Problem("An error occurred while fetching users."); }
         }
 
         [HttpPut("{id}")]
         public ActionResult<User> Update(int id, [FromBody] User uUser)
         {
-            var user = userDbRepository.GetByIdDb(id);
-            if (string.IsNullOrWhiteSpace(uUser.Username) || string.IsNullOrWhiteSpace(uUser.Name) || string.IsNullOrWhiteSpace(uUser.LastName) || string.IsNullOrWhiteSpace(uUser.Birthday.ToString()))
+            if (uUser == null || string.IsNullOrWhiteSpace(uUser.Username) || string.IsNullOrWhiteSpace(uUser.Name) || string.IsNullOrWhiteSpace(uUser.LastName) || string.IsNullOrWhiteSpace(uUser.Birthday.ToString()))
             {
-                return BadRequest();
+                return BadRequest("Invalid user data.");
             }
-            if (user == null) { return NotFound(); }
-            
-            return Ok(userDbRepository.UpdateUser(id, uUser));
+            try
+            {
+                uUser.Id = id;
+                User user = userDbRepository.UpdateUser(id, uUser);
+                if(user == null)
+                {
+                    return NotFound();
+                }
+                return Ok(user);
+            }
+            catch (Exception ex) { return Problem("An error occurred while fetching users."); }
+
         }
 
         [HttpDelete("{id}")]
         public ActionResult Delete(int id)
         {
-            var user = userDbRepository.GetByIdDb(id);
-            if (user == null) { return NotFound(); }
-            userDbRepository.DeleteUser(id);
-            return NoContent();
+            try
+            {
+                bool deleted = userDbRepository.DeleteUser(id);
+                if (deleted)
+                {
+                    return NoContent();
+                }
+                return NotFound();
+            } catch (Exception ex) { return Problem("An error occurred while fetching users.");}
         }
     }
 }

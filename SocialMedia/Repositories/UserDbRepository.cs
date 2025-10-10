@@ -5,12 +5,19 @@ namespace SocialMedia.Repositories
 {
     public class UserDbRepository
     {
+        private readonly string connectionString;
+
+        public UserDbRepository(IConfiguration configuration)
+        {
+            connectionString = configuration["ConnectionString:SQLiteConnection"];
+        }
+
         public List<User> GetAll()
         {
             List<User> users = new List<User>();
             try
             {
-                using SqliteConnection connection = new SqliteConnection("Data Source = database/socialdata.db");
+                using SqliteConnection connection = new SqliteConnection(connectionString);
                 connection.Open();
 
                 string query = "SELECT * FROM Users";
@@ -31,18 +38,22 @@ namespace SocialMedia.Repositories
             catch (SqliteException ex)
             {
                 Console.WriteLine($"Greška pri konekciji ili izvršavanju neispravnih SQL upita: {ex.Message}");
+                throw;
             }
             catch (FormatException ex)
             {
                 Console.WriteLine($"Greška u konverziji podataka iz baze: {ex.Message}");
+                throw;
             }
             catch (InvalidOperationException ex)
             {
                 Console.WriteLine($"Konekcija nije otvorena ili je otvorena više puta: {ex.Message}");
+                throw;
             }
             catch (Exception ex)
             {
                 Console.WriteLine($"Neočekivana greška: {ex.Message}");
+                throw;
             }
             return users;
         }
@@ -52,7 +63,7 @@ namespace SocialMedia.Repositories
             User user = null;
             try
             {
-                using SqliteConnection connection = new SqliteConnection("Data Source = database/socialdata.db");
+                using SqliteConnection connection = new SqliteConnection(connectionString);
                 connection.Open();
 
                 string query = "SELECT * FROM Users WHERE Id = @Id";
@@ -74,18 +85,22 @@ namespace SocialMedia.Repositories
             catch (SqliteException ex)
             {
                 Console.WriteLine($"Greška pri konekciji ili izvršavanju neispravnih SQL upita: {ex.Message}");
+                throw;
             }
             catch (FormatException ex)
             {
                 Console.WriteLine($"Greška u konverziji podataka iz baze: {ex.Message}");
+                throw;
             }
             catch (InvalidOperationException ex)
             {
                 Console.WriteLine($"Konekcija nije otvorena ili je otvorena više puta: {ex.Message}");
+                throw;
             }
             catch (Exception ex)
             {
                 Console.WriteLine($"Neočekivana greška: {ex.Message}");
+                throw;
             }
             return user;
         }
@@ -94,9 +109,9 @@ namespace SocialMedia.Repositories
         {
             try
             {
-                using SqliteConnection connection = new SqliteConnection("Data Source = database/socialdata.db");
+                using SqliteConnection connection = new SqliteConnection(connectionString);
                 connection.Open();
-                string query = "INSERT INTO Users(Username, Name, Surname, Birthday) VALUES(@Username, @Name, @Surname, @Birthday)";
+                string query = "INSERT INTO Users(Username, Name, Surname, Birthday) VALUES(@Username, @Name, @Surname, @Birthday); SELECT LAST_INSERT_ROWID();";
                 using SqliteCommand command = new SqliteCommand(query, connection);
 
                 command.Parameters.AddWithValue("@Username", newUser.Username);
@@ -104,32 +119,37 @@ namespace SocialMedia.Repositories
                 command.Parameters.AddWithValue("@Surname", newUser.LastName);
                 command.Parameters.AddWithValue("@Birthday", newUser.Birthday);
 
-                command.ExecuteNonQuery();
+                //command.ExecuteNonQuery();
+                newUser.Id = Convert.ToInt32(command.ExecuteScalar());
+                return newUser;
             }
             catch (SqliteException ex)
             {
                 Console.WriteLine($"Greška pri konekciji ili izvršavanju neispravnih SQL upita: {ex.Message}");
+                throw;
             }
             catch (FormatException ex)
             {
                 Console.WriteLine($"Greška u konverziji podataka iz baze: {ex.Message}");
+                throw;
             }
             catch (InvalidOperationException ex)
             {
                 Console.WriteLine($"Konekcija nije otvorena ili je otvorena više puta: {ex.Message}");
+                throw;
             }
             catch (Exception ex)
             {
                 Console.WriteLine($"Neočekivana greška: {ex.Message}");
+                throw;
             }
-            return newUser;
         }
 
         public User UpdateUser(int id, User user)
         {
             try
             {
-                using SqliteConnection connection = new SqliteConnection("Data Source = database/socialdata.db");
+                using SqliteConnection connection = new SqliteConnection(connectionString);
                 connection.Open();
                 string query = "UPDATE Users SET Username=@Username, Name = @Name, Surname = @Surname, Birthday = @Birthday WHERE Id = @Id";
                 using SqliteCommand command = new SqliteCommand(query, connection);
@@ -140,54 +160,63 @@ namespace SocialMedia.Repositories
                 command.Parameters.AddWithValue("@Surname", user.LastName);
                 command.Parameters.AddWithValue("@Birthday", user.Birthday);
 
-                command.ExecuteNonQuery();
+                int affectedRows = command.ExecuteNonQuery();
+                return affectedRows > 0 ? user : null;
             }
             catch (SqliteException ex)
             {
                 Console.WriteLine($"Greška pri konekciji ili izvršavanju neispravnih SQL upita: {ex.Message}");
+                throw;
             }
             catch (FormatException ex)
             {
                 Console.WriteLine($"Greška u konverziji podataka iz baze: {ex.Message}");
+                throw;
             }
             catch (InvalidOperationException ex)
             {
                 Console.WriteLine($"Konekcija nije otvorena ili je otvorena više puta: {ex.Message}");
+                throw;
             }
             catch (Exception ex)
             {
                 Console.WriteLine($"Neočekivana greška: {ex.Message}");
+                throw;
             }
-            return user;
         }
-        public void DeleteUser(int id)
+        public bool DeleteUser(int id)
         {
             try
             {
-                using SqliteConnection connection = new SqliteConnection("Data Source = database/socialdata.db");
+                using SqliteConnection connection = new SqliteConnection(connectionString);
                 connection.Open();
                 string query = "DELETE FROM Users WHERE Id = @Id";
                 using SqliteCommand command = new SqliteCommand(query, connection);
 
                 command.Parameters.AddWithValue("@Id", id);
 
-                command.ExecuteNonQuery();
+                int rowsAffected = command.ExecuteNonQuery();
+                return rowsAffected > 0;
             }
             catch (SqliteException ex)
             {
                 Console.WriteLine($"Greška pri konekciji ili izvršavanju neispravnih SQL upita: {ex.Message}");
+                throw;
             }
             catch (FormatException ex)
             {
                 Console.WriteLine($"Greška u konverziji podataka iz baze: {ex.Message}");
+                throw;
             }
             catch (InvalidOperationException ex)
             {
                 Console.WriteLine($"Konekcija nije otvorena ili je otvorena više puta: {ex.Message}");
+                throw;
             }
             catch (Exception ex)
             {
                 Console.WriteLine($"Neočekivana greška: {ex.Message}");
+                throw;
             }
         }
     }
