@@ -73,5 +73,43 @@ namespace SocialMedia.Repositories
             }
             return users.Values.ToList();
         }
+
+        public Post CreateNewPost(Post post)
+        {
+            try
+            {
+                using SqliteConnection connection = new SqliteConnection(connectionString);
+                connection.Open();
+                string query = "INSERT INTO Posts(UserId, Content, Date) VALUES(@UserId, @Content, @Date); SELECT LAST_INSERT_ROWID();";
+                using SqliteCommand command = new SqliteCommand(query, connection);
+
+                command.Parameters.AddWithValue("@UserId", post.UserId);
+                command.Parameters.AddWithValue("@Content", post.Content);
+                command.Parameters.AddWithValue("@Date", post.Date.ToString("yyyy-MM-dd"));
+
+                post.Id = Convert.ToInt32(command.ExecuteScalar());
+                return post;
+            }
+            catch (SqliteException ex)
+            {
+                Console.WriteLine($"Greška pri konekciji ili izvršavanju neispravnih SQL upita: {ex.Message}");
+                throw;
+            }
+            catch (FormatException ex)
+            {
+                Console.WriteLine($"Greška u konverziji podataka iz baze: {ex.Message}");
+                throw;
+            }
+            catch (InvalidOperationException ex)
+            {
+                Console.WriteLine($"Konekcija nije otvorena ili je otvorena više puta: {ex.Message}");
+                throw;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Neočekivana greška: {ex.Message}");
+                throw;
+            }
+        }
     } 
 }

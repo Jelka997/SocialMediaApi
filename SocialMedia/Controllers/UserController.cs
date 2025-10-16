@@ -73,6 +73,19 @@ namespace SocialMedia.Controllers
             }
             catch (Exception ex) { return Problem("An error occurred while fetching users."); }
         }
+        [HttpPost("post")]
+        public ActionResult<Post> CreatePost([FromBody]Post newPost)
+        {
+            if (newPost == null || string.IsNullOrWhiteSpace(newPost.Content) || string.IsNullOrWhiteSpace(newPost.Date.ToString()))
+            {
+                return BadRequest("Invalid post data.");
+            }
+            try
+            {
+                return Ok(postDbRepository.CreateNewPost(newPost));
+            }
+            catch (Exception ex) { return Problem("An error occurred while creating post."); }
+        }
 
         [HttpPut("{id}")]
         public ActionResult<User> Update(int id, [FromBody] User uUser)
