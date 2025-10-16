@@ -40,12 +40,14 @@ namespace SocialMedia.Controllers
             catch (Exception ex) { return Problem("An error occurred while fetching users."); }
         }
 
+
         [HttpGet("posts")]
         public ActionResult GetAll()
         {
             List<User> users= postDbRepository.GetAll();
             return Ok(users);
         }
+
 
         [HttpGet("{id}")]
         public ActionResult<User> GetById(int id)
@@ -60,6 +62,7 @@ namespace SocialMedia.Controllers
 
         }
 
+
         [HttpPost]
         public ActionResult<User> Create([FromBody] User newUser)
         {
@@ -73,6 +76,8 @@ namespace SocialMedia.Controllers
             }
             catch (Exception ex) { return Problem("An error occurred while fetching users."); }
         }
+
+
         [HttpPost("post")]
         public ActionResult<Post> CreatePost([FromBody]Post newPost)
         {
@@ -86,6 +91,7 @@ namespace SocialMedia.Controllers
             }
             catch (Exception ex) { return Problem("An error occurred while creating post."); }
         }
+
 
         [HttpPut("{id}")]
         public ActionResult<User> Update(int id, [FromBody] User uUser)
@@ -108,6 +114,7 @@ namespace SocialMedia.Controllers
 
         }
 
+
         [HttpDelete("{id}")]
         public ActionResult Delete(int id)
         {
@@ -120,6 +127,21 @@ namespace SocialMedia.Controllers
                 }
                 return NotFound();
             } catch (Exception ex) { return Problem("An error occurred while fetching users.");}
+        }
+
+        [HttpDelete("postId")]
+        public ActionResult DeletePost(int id)
+        {
+            try
+            {
+                bool deleted = postDbRepository.DeletePost(id);
+                if (deleted)
+                {
+                    return NoContent();
+                }
+                return NotFound();
+            }
+            catch (Exception ex) { return Problem("An error occurred while fetching post."); }
         }
     }
 }
