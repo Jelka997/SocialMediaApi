@@ -65,14 +65,26 @@ public class GroupDbRepository
             using SqliteConnection connection = new SqliteConnection(connectionString);
             connection.Open();
         
-            string query = "SELECT * FROM Groups  WHERE Id = @Id";
+            string query = "SELECT g.Id as GroupID, g.Name as GroupName, g.CreationDate, u.Id as UserID, u.Username, u.Name AS UserName, u.Surname, u.Birthday FROM GroupMemberships gm INNER JOIN Groups g ON gm.GroupId = g.Id INNER JOIN Users u ON gm.UserId = u.Id WHERE g.Id = @Id";
             using SqliteCommand command = new SqliteCommand(query, connection);
             command.Parameters.AddWithValue("@Id", id);
-
             using SqliteDataReader reader = command.ExecuteReader();
+            
             while (reader.Read())
             {
-                group = new Group(Convert.ToInt32(reader["Id"]), reader["Name"].ToString(), DateTime.Parse(reader["CreationDate"].ToString()));
+                if(group == null)
+                {
+                    group = new Group(Convert.ToInt32(reader["GroupID"]), reader["GroupName"].ToString(),
+                        DateTime.Parse(reader["CreationDate"].ToString()));
+                }
+                
+                if (reader["UserID"] != DBNull.Value)
+                {
+                    User user = new User(Convert.ToInt32(reader["UserID"]), reader["Username"].ToString(),
+                        reader["UserName"].ToString(), reader["Surname"].ToString(),
+                        DateTime.Parse(reader["Birthday"].ToString()));
+                    group.Users.Add(user);
+                }
             }
         }
         catch (SqliteException ex)
