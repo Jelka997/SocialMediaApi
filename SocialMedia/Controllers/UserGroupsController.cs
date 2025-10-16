@@ -11,6 +11,16 @@ namespace SocialMedia.Controllers
     {
         private GroupRepository groupRepository = new GroupRepository();
         private UserRepository userRepository = new UserRepository();
+        private readonly GroupMembershipDbRepository  groupMembershipDbRepository;
+        private readonly GroupDbRepository  groupDbRepository;
+        private readonly UserDbRepository  userDbRepository;
+
+        public UserGroupsController(IConfiguration configuration)
+        {
+            groupDbRepository = new GroupDbRepository(configuration);
+            userDbRepository = new UserDbRepository(configuration);
+            groupMembershipDbRepository = new GroupMembershipDbRepository(configuration);
+        }
 
         [HttpGet]
         public ActionResult<List<User>> Get(int groupId, int userId)
@@ -84,6 +94,39 @@ namespace SocialMedia.Controllers
             return NoContent();
         }
         
-        
+        [HttpPut("users")]
+        public ActionResult<Group> AddUser(int groupId, int userId)
+        {
+            Group group = groupDbRepository.GetById(groupId);
+            if (group == null)
+            {
+                return NotFound($"Group {groupId} not found");
+            }
+
+
+            User user = userDbRepository.GetByIdDb(userId);
+            if (user == null)
+            {
+                return NotFound($"User {userId} not found");
+            }
+
+            if (group.Users.Contains(user))
+            {
+                return Conflict($"User {userId} already exists");
+            }
+
+            try
+            {
+                if (!groupMembershipDbRepository.AddUser(groupId, userId))
+                {
+                    return Conflict($"User {userId} already exists in the group {groupId}");
+                }
+                return Ok(group);
+            }
+            catch (Exception ex)
+            {
+                return Problem("An error occurred while creating the link.");
+            }
+        }
     }
 }
