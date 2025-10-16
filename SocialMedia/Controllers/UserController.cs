@@ -12,10 +12,12 @@ namespace SocialMedia.Controllers
     { private GroupRepository groupRepository = new GroupRepository();
         private UserRepository userRepository = new UserRepository();
         private UserDbRepository userDbRepository;
+        private PostDbRepository postDbRepository;
 
         public UserController(IConfiguration configuration)
         {
             userDbRepository = new UserDbRepository(configuration);
+            postDbRepository = new PostDbRepository(configuration);
         }
 
         [HttpGet]
@@ -36,6 +38,13 @@ namespace SocialMedia.Controllers
                 return Ok(result);
             }
             catch (Exception ex) { return Problem("An error occurred while fetching users."); }
+        }
+
+        [HttpGet("posts")]
+        public ActionResult GetAll()
+        {
+            List<User> users= postDbRepository.GetAll();
+            return Ok(users);
         }
 
         [HttpGet("{id}")]

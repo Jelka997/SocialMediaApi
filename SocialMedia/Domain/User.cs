@@ -13,6 +13,7 @@ public class User
     public DateTime Birthday { get; set; }
     [JsonIgnore]
     public List<Group>? Groups { get; set; }
+    public List<Post> Posts { get; set; }
 
     public User(int id, string username, string name, string lastName, DateTime birthday)
     {
@@ -22,6 +23,7 @@ public class User
         LastName = lastName;
         Birthday = birthday;
         Groups = new List<Group>();
+        Posts = new List<Post>();
     }
 
     public User()
