@@ -128,5 +128,23 @@ namespace SocialMedia.Controllers
                 return Problem("An error occurred while creating the link.");
             }
         }
+
+        [HttpDelete("users")]
+        public ActionResult RemoveUser(int groupId, int userId)
+        {
+            try
+            {
+                bool isDeleted = groupMembershipDbRepository.RemoveUserFromGroup(groupId, userId); 
+                if (isDeleted)
+                {
+                    return NoContent(); 
+                }
+                return NotFound($"Group/User not found."); 
+            }
+            catch (Exception ex)
+            {
+                return Problem("An error occurred while removing user from the group.");
+            }
+        }
     }
 }

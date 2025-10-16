@@ -54,4 +54,37 @@ public class GroupMembershipDbRepository
             throw;
         }
     }
+
+    public bool RemoveUserFromGroup(int groupId, int userId)
+    {
+        try
+        {
+            using SqliteConnection connection = new SqliteConnection(connectionString);
+            connection.Open(); 
+            
+            string query = "DELETE FROM GroupMemberships WHERE GroupId = @GroupId AND UserId = @UserId";
+            using SqliteCommand command = new SqliteCommand(query, connection);
+            
+            command.Parameters.AddWithValue("@GroupId", groupId);
+            command.Parameters.AddWithValue("@UserId", userId);
+            
+            int rowsAffected = command.ExecuteNonQuery();
+            return rowsAffected > 0;
+        }
+        catch (SqliteException ex)
+        {
+            Console.WriteLine($"Greška pri povezivanju sa bazom ili izvršavanju SQL upita: {ex.Message}");
+            throw;
+        }
+        catch (InvalidOperationException ex)
+        {
+            Console.WriteLine($"Greška jer konekcija nije ili je više puta otvorena: {ex.Message}");
+            throw;
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Neočekivana greška: {ex.Message}");
+            throw;
+        }
+    }
 }
